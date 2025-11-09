@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  # FastAPI Application
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: fastapi_saas_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../app:/app/app
+      - ../alembic:/app/alembic
+      - ../tests:/app/tests
+    environment:
+      - DEBUG=true
+      - ENVIRONMENT=development
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=saas_db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_DB=saas_db
+    env_file:
+      - ../.env
+    depends_on:
+      - postgres
+      - redis
+      - mongodb
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - saas_network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: fastapi_saas_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=saas_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saas_network
+
+  # Redis for Caching and Rate Limiting
+  redis:
+    image: redis:7-alpine
+    container_name: fastapi_saas_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saas_network
+
+  # MongoDB (Optional)
+  mongodb:
+    image: mongo:7
+    container_name: fastapi_saas_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=saas_db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saas_network
+
+  # Celery Worker (Optional - for background tasks)
+  celery_worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: fastapi_saas_celery_worker
+    volumes:
+      - ../app:/app/app
+    environment:
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+    env_file:
+      - ../.env
+    depends_on:
+      - postgres
+      - redis
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+    networks:
+      - saas_network
+    profiles:
+      - celery
+
+  # Celery Beat (Optional - for scheduled tasks)
+  celery_beat:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: fastapi_saas_celery_beat
+    volumes:
+      - ../app:/app/app
+    environment:
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+    env_file:
+      - ../.env
+    depends_on:
+      - postgres
+      - redis
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+    networks:
+      - saas_network
+    profiles:
+      - celery
+
+  # Flower (Optional - Celery monitoring)
+  flower:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: fastapi_saas_flower
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/1
+    depends_on:
+      - redis
+      - celery_worker
+    command: celery -A app.tasks.celery_app flower --port=5555
+    networks:
+      - saas_network
+    profiles:
+      - celery
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongodb_data:
+
+networks:
+  saas_network:
+    driver: bridge
