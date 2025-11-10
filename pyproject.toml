@@ -1,100 +1,122 @@
-[tool.poetry]
+[project]
 name = "fastapi-saas-boilerplate"
 version = "1.0.0"
 description = "A modular and production-ready SaaS boilerplate built with FastAPI"
-authors = ["Your Name <your.email@example.com>"]
-license = "MIT"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+license = {text = "MIT"}
 readme = "README.md"
-packages = [{include = "app"}]
+requires-python = ">=3.11"
 
-[tool.poetry.dependencies]
-python = "^3.11"
-# FastAPI & ASGI
-fastapi = "^0.109.0"
-uvicorn = {extras = ["standard"], version = "^0.27.0"}
-python-multipart = "^0.0.6"
+dependencies = [
+    # FastAPI & ASGI
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "python-multipart>=0.0.6",
 
-# Pydantic & Settings
-pydantic = "^2.5.3"
-pydantic-settings = "^2.1.0"
-email-validator = "^2.1.0"
+    # Pydantic & Settings
+    "pydantic>=2.5.3",
+    "pydantic-settings>=2.1.0",
+    "email-validator>=2.1.0",
 
-# Database - PostgreSQL
-sqlalchemy = "^2.0.25"
-asyncpg = "^0.29.0"
-psycopg2-binary = "^2.9.9"
-alembic = "^1.13.1"
+    # Database - PostgreSQL
+    "sqlalchemy[asyncio]>=2.0.25",
+    "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.9",
+    "alembic>=1.13.1",
 
-# Database - MongoDB
-motor = "^3.3.2"
-pymongo = "^4.6.1"
+    # Database - MongoDB
+    "motor>=3.3.2",
+    "pymongo>=4.6.1",
 
-# Authentication & Security
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-bcrypt = "^4.1.2"
-python-dotenv = "^1.0.0"
+    # Authentication & Security
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=4.1.2",
+    "python-dotenv>=1.0.0",
 
-# OAuth
-authlib = "^1.3.0"
-httpx = "^0.26.0"
+    # OAuth
+    "authlib>=1.3.0",
+    "httpx>=0.26.0",
 
-# Redis & Caching
-redis = "^5.0.1"
-hiredis = "^2.3.2"
+    # Redis & Caching
+    "redis>=5.0.1",
+    "hiredis>=2.3.2",
 
-# Background Tasks
-celery = "^5.3.6"
-flower = "^2.0.1"
+    # Background Tasks
+    "celery>=5.3.6",
+    "flower>=2.0.1",
 
-# Email
-aiosmtplib = "^3.0.1"
-jinja2 = "^3.1.3"
+    # Email
+    "aiosmtplib>=3.0.1",
+    "jinja2>=3.1.3",
 
-# AI Providers
-openai = "^1.10.0"
-anthropic = "^0.8.1"
-google-generativeai = "^0.3.2"
+    # AI Providers
+    "openai>=1.10.0",
+    "anthropic>=0.8.1",
+    "google-generativeai>=0.3.2",
 
-# Utilities
-python-slugify = "^8.0.2"
-shortuuid = "^1.0.11"
+    # Utilities
+    "python-slugify>=8.0.2",
+    "shortuuid>=1.0.11",
 
-# Monitoring & Logging
-prometheus-client = "^0.19.0"
-python-json-logger = "^2.0.7"
+    # Monitoring & Logging
+    "prometheus-client>=0.19.0",
+    "python-json-logger>=2.0.7",
 
-# Stripe (for subscriptions)
-stripe = "^7.12.0"
+    # Stripe
+    "stripe>=7.12.0",
+]
 
-[tool.poetry.group.dev.dependencies]
-# Testing
-pytest = "^7.4.4"
-pytest-asyncio = "^0.23.3"
-pytest-cov = "^4.1.0"
-pytest-mock = "^3.12.0"
-httpx = "^0.26.0"
-faker = "^22.6.0"
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.23.3",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "faker>=22.6.0",
 
-# Linting & Formatting
-black = "^24.1.1"
-isort = "^5.13.2"
-flake8 = "^7.0.0"
-mypy = "^1.8.0"
-pylint = "^3.0.3"
+    # Linting & Formatting
+    "black>=24.1.1",
+    "isort>=5.13.2",
+    "flake8>=7.0.0",
+    "mypy>=1.8.0",
+    "pylint>=3.0.3",
+    "ruff>=0.1.0",
 
-# Pre-commit
-pre-commit = "^3.6.0"
+    # Pre-commit
+    "pre-commit>=3.6.0",
 
-# Type stubs
-types-python-jose = "^3.3.4"
-types-passlib = "^1.7.7"
-types-redis = "^4.6.0"
-sqlalchemy = {extras = ["mypy"], version = "^2.0.25"}
+    # Type stubs
+    "types-python-jose>=3.3.4",
+    "types-passlib>=1.7.7",
+    "types-redis>=4.6.0",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.23.3",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "faker>=22.6.0",
+    "black>=24.1.1",
+    "isort>=5.13.2",
+    "flake8>=7.0.0",
+    "mypy>=1.8.0",
+    "pylint>=3.0.3",
+    "ruff>=0.1.0",
+    "pre-commit>=3.6.0",
+    "types-python-jose>=3.3.4",
+    "types-passlib>=1.7.7",
+    "types-redis>=4.6.0",
+]
 
 [tool.black]
 line-length = 100
@@ -124,6 +146,20 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 skip_glob = ["*/migrations/*", "*/alembic/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+    "alembic",
+    "migrations",
+]
 
 [tool.mypy]
 python_version = "3.11"

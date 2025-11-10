@@ -31,9 +31,9 @@ A production-ready, modular, and highly configurable SaaS boilerplate built with
 - 🐳 **Docker Support** - Complete Docker Compose setup
 - 🧪 **Testing** - Pytest with fixtures and coverage
 - 📝 **API Documentation** - Auto-generated OpenAPI/Swagger docs
-- 🎨 **Code Quality** - Black, isort, flake8, mypy
+- 🎨 **Code Quality** - Ruff, Black, isort, mypy
 - 🪝 **Pre-commit Hooks** - Automated code quality checks
-- 📦 **Poetry** - Modern dependency management
+- ⚡ **UV** - Ultra-fast Python package manager
 - 🔧 **Makefile** - Convenient development commands
 
 ## 🏗️ Architecture
@@ -60,9 +60,22 @@ app/
 ### Prerequisites
 
 - Python 3.11+
+- [UV](https://github.com/astral-sh/uv) - Fast Python package manager
 - PostgreSQL 15+
 - Redis 7+ (optional, for rate limiting/caching)
 - Docker & Docker Compose (optional)
+
+**Install UV:**
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or with pip
+pip install uv
+```
 
 ### Option 1: Docker Setup (Recommended)
 
@@ -93,11 +106,20 @@ app/
    - Docs: http://localhost:8000/docs
    - Health: http://localhost:8000/api/v1/health
 
-### Option 2: Local Development
+### Option 2: Local Development with UV
 
 1. **Install dependencies**
    ```bash
-   make install
+   # Install production dependencies
+   uv pip install -e .
+
+   # Or install with dev dependencies
+   make install-dev
+   # or
+   uv pip install -e ".[dev]"
+
+   # Sync dependencies (creates uv.lock)
+   uv sync
    ```
 
 2. **Setup database**
@@ -107,6 +129,8 @@ app/
 
    # Run migrations
    make migrate
+   # or
+   uv run alembic upgrade head
    ```
 
 3. **Configure environment**
@@ -118,6 +142,8 @@ app/
 4. **Run development server**
    ```bash
    make dev
+   # or
+   uv run uvicorn app.main:app --reload
    ```
 
 ## ⚙️ Configuration
@@ -200,7 +226,11 @@ make test
 make test-unit
 
 # Run with coverage report
-poetry run pytest --cov=app --cov-report=html
+uv run pytest --cov=app --cov-report=html
+
+# Or use make commands
+make test-integration
+make test-e2e
 ```
 
 ## 🎨 Code Quality
@@ -208,9 +238,15 @@ poetry run pytest --cov=app --cov-report=html
 ```bash
 # Format code
 make format
+# or
+uv run black app tests
+uv run isort app tests
 
 # Run linters
 make lint
+# or
+uv run ruff check app tests
+uv run mypy app
 
 # Run all checks
 make check
@@ -345,7 +381,8 @@ gunicorn app.main:app \
 ├── scripts/             # Utility scripts
 ├── tests/               # Test suite
 ├── .env.example         # Environment template
-├── pyproject.toml       # Poetry dependencies
+├── pyproject.toml       # Project dependencies (uv/pip)
+├── uv.lock              # Dependency lock file (auto-generated)
 ├── Makefile             # Development commands
 └── README.md            # This file
 ```
@@ -366,10 +403,12 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [SQLAlchemy](https://www.sqlalchemy.org/)
-- [Pydantic](https://docs.pydantic.dev/)
-- [Alembic](https://alembic.sqlalchemy.org/)
+- [FastAPI](https://fastapi.tiangolo.com/) - Modern web framework
+- [UV](https://github.com/astral-sh/uv) - Ultra-fast Python package manager
+- [SQLAlchemy](https://www.sqlalchemy.org/) - SQL toolkit and ORM
+- [Pydantic](https://docs.pydantic.dev/) - Data validation
+- [Alembic](https://alembic.sqlalchemy.org/) - Database migrations
+- [Ruff](https://github.com/astral-sh/ruff) - Fast Python linter
 
 ## 📧 Support
 
